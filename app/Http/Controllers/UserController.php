@@ -26,7 +26,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return response()->json('/api/auth/register', 308);
     }
 
     /**
@@ -37,7 +37,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        //
+        return UserResource::make($user);
     }
 
     /**
@@ -60,6 +60,6 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        $user->delete();
     }
 }

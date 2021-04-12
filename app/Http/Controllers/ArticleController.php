@@ -15,7 +15,7 @@ class ArticleController extends Controller
      * @return void
      */
     public function __construct() {
-        $this->middleware('auth:sanctum', ['except' => ['show']]);
+        $this->middleware('auth:sanctum', ['except' => ['index', 'show']]);
     }
 
     /**
@@ -54,7 +54,7 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
-        //
+        return ArticleResource::make($article);
     }
 
     /**
@@ -77,6 +77,6 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
-        //
+        $article->delete();
     }
 }
