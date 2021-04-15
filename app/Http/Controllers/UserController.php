@@ -2,12 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PermissionEnum;
 use App\Http\Resources\UserResource;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    /**
+     * Create a new UserController instance.
+     *
+     * @return void
+     */
+    public function __construct() {
+        $this->middleware('auth:sanctum', ['except' => ['show']]);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -49,7 +61,40 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //
+        if ($request->user()->id === $user->id) {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|between:2,100'
+            ]);
+
+            if($validator->fails()){
+                return response()->json($validator->errors()->toJson(), 400);
+            }
+
+            $user->name = $request->name;
+            $user->save();
+
+            return response()->json([
+                'message' => 'User successfully updated',
+                'user' => $user
+            ], 201);
+        } else {
+            if(!$request->user()->tokenCan(PermissionEnum::ChangeRole)) {
+                return response()->json("You don't have the permission of modify an user role.", 405);
+            }
+
+            $validator = Validator::make($request->all(), [
+                'role' => 'required|integer|exists:role|min:0|max:' . $request->user()->role->id
+            ]);
+
+            if($validator->fails()){
+                return response()->json($validator->errors()->toJson(), 400);
+            }
+
+            $user->role()->associate(Role::find($request->role));
+            $user->save();
+
+            return response()->json('User role successfully updated.', 201);
+        }
     }
 
     /**

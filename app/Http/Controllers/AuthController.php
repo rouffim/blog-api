@@ -39,8 +39,11 @@ class AuthController extends Controller
         if (! $token = auth()->attempt($validator->validated())) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-        
-        return $request->user()->createToken('auth', $request->user()->role->permissionsArray())->plainTextToken;
+
+        return response()->json([
+            'user' => UserResource::make($request->user()),
+            'token' => $request->user()->createToken('auth', $request->user()->role->permissionsArray())->plainTextToken
+        ], 201);
     }
 
     /**

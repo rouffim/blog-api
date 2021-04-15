@@ -18,14 +18,27 @@ class Article extends Model
     protected $table = 'article';
 
     /**
-     * Get the route key for the model.
+     * The path where the articles images are located.
      *
-     * @return string
+     * @var string
      */
-    public function getRouteKeyName()
-    {
-        return 'uuid';
-    }
+    public static $image_location = 'images/articles';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'uuid',
+        'title',
+        'excerpt',
+        'body',
+        'image_extension',
+        'nb_views',
+        'is_pinned',
+        'user_id',
+    ];
 
     public static $sortable = [
         'title',
@@ -35,6 +48,37 @@ class Article extends Model
         'created_at',
         'updated_at',
     ];
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'nb_views' => 0,
+        'is_pinned' => false,
+    ];
+
+    /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
+
+    /**
+     * Get the filename of the article.
+     * @return string|null
+     */
+    public function getFilename(): ?string
+    {
+        return is_null($this->image_extension) ?
+            null :
+            $this->uuid . '.' . $this->image_extension;
+    }
 
     /**
      * Get the user that owns this article.
