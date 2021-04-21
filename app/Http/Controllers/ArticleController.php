@@ -6,6 +6,7 @@ use App\Enums\PermissionEnum;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -46,13 +47,11 @@ class ArticleController extends Controller
      */
     public function store(Request $request)
     {
-        if(!$request->user()->tokenCan(PermissionEnum::AddArticle)) {
-            return response()->json("You don't have the permission to add an article.", 405);
-        }
+        Gate::authorize(PermissionEnum::AddArticle);
 
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|between:10,200',
-            'excerpt' => 'string|max:500',
+            'title' => 'required|string|between:3,200',
+            'excerpt' => 'string|max:200',
             'body' => 'required|string',
             'image' => 'image',
             'is_pinned' => 'boolean',
@@ -67,10 +66,7 @@ class ArticleController extends Controller
 
         $this->updateArticle($request, $article);
 
-        return response()->json([
-            'message' => 'Article successfully stored',
-            'article' => $article
-        ], 201);
+        return response()->json(ArticleResource::make($article), 201);
     }
 
     /**
@@ -93,13 +89,7 @@ class ArticleController extends Controller
      */
     public function update(Request $request, Article $article)
     {
-        if($request->user() === $article->user()->id) {
-            if (!$request->user()->tokenCan(PermissionEnum::EditOwnArticle)) {
-                return response()->json("You don't have the permission to edit this article.", 405);
-            }
-        } else if (!$request->user()->tokenCan(PermissionEnum::EditAllArticle)) {
-            return response()->json("You don't have the permission to edit this article.", 405);
-        }
+        Gate::authorize(PermissionEnum::EditOwnArticle);
 
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|between:10,200',
@@ -115,10 +105,7 @@ class ArticleController extends Controller
 
         $this->updateArticle($request, $article);
 
-        return response()->json([
-            'message' => 'Article successfully updated',
-            'article' => $article
-        ], 201);
+        return response()->json(ArticleResource::make($article), 201);
     }
 
     /**
@@ -129,6 +116,8 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
+        Gate::authorize(PermissionEnum::RemoveOwnArticle);
+
         $article->delete();
     }
 
@@ -147,7 +136,7 @@ class ArticleController extends Controller
             $article->excerpt = $request->excerpt;
         }
 
-        if ($request->has('is_pinned') && $request->user()->tokenCan(PermissionEnum::PinArticle)) {
+        if ($request->has('is_pinned') && is_bool($request->is_pinned) && $request->user()->tokenCan(PermissionEnum::PinArticle)) {
             $article->is_pinned = $request->is_pinned;
         }
 

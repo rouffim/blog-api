@@ -18,7 +18,7 @@ USE `blog`;
 
 DROP TABLE IF EXISTS `article`;
 CREATE TABLE `article` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `uuid` varchar(37) NOT NULL,
   `title` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `excerpt` varchar(512) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE `article` (
   `image_extension` varchar(32) DEFAULT NULL,
   `nb_views` int(11) NOT NULL DEFAULT '0',
   `is_pinned` tinyint(1) NOT NULL DEFAULT '0',
-  `users_id` bigint(20) NOT NULL,
+  `users_id` bigint(20) unsigned NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `deleted_at` timestamp NULL DEFAULT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE `article` (
   UNIQUE KEY `uq_article_uuid` (`uuid`),
   KEY `article_users_idx` (`users_id`),
   FULLTEXT KEY `ft_article_title` (`title`),
-  CONSTRAINT `fk_article_users` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
+  CONSTRAINT `fk_article_users` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- DROP TABLE IF EXISTS `tag`;
@@ -67,10 +67,10 @@ CREATE TABLE `article` (
 
 DROP TABLE IF EXISTS `article_has_like`;
 CREATE TABLE `article_has_like` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `uuid` varchar(37) NOT NULL,
-  `article_id` bigint(20) NOT NULL,
-  `users_id` bigint(20) NOT NULL,
+  `article_id` bigint(20) unsigned NOT NULL,
+  `users_id` bigint(20) unsigned NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `deleted_at` timestamp NULL DEFAULT NULL,
@@ -85,11 +85,11 @@ CREATE TABLE `article_has_like` (
 
 DROP TABLE IF EXISTS `article_has_comment`;
 CREATE TABLE `article_has_comment` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `uuid` varchar(37) NOT NULL,
   `content` varchar(1024) COLLATE utf8_unicode_ci NOT NULL,
-  `article_id` bigint(20) NOT NULL,
-  `users_id` bigint(20) NOT NULL,
+  `article_id` bigint(20) unsigned NOT NULL,
+  `users_id` bigint(20) unsigned NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `deleted_at` timestamp NULL DEFAULT NULL,
@@ -110,7 +110,7 @@ CREATE TABLE `users` (
   `email_verified_at` timestamp NULL DEFAULT NULL,
   `password` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
   `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `role_id` int(11) NOT NULL,
+  `role_id` int(11) unsigned NOT NULL,
   `image_extension` varchar(32) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -120,12 +120,12 @@ CREATE TABLE `users` (
   UNIQUE KEY `uq_users_email` (`email`),
   KEY `users_role_idx` (`role_id`),
   CONSTRAINT `fk_users_role` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 DROP TABLE IF EXISTS `role`;
 CREATE TABLE `role` (
-  `id` int(11) NOT NULL,
+  `id` int(11) unsigned NOT NULL,
   `name` varchar(63) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -133,8 +133,8 @@ CREATE TABLE `role` (
 
 DROP TABLE IF EXISTS `role_has_permission`;
 CREATE TABLE `role_has_permission` (
-  `role_id` int(11) NOT NULL,
-  `permission_id` int(11) NOT NULL,
+  `role_id` int(11) unsigned NOT NULL,
+  `permission_id` int(11) unsigned NOT NULL,
   PRIMARY KEY (`role_id`,`permission_id`),
   KEY `k_permission_has_role_role1_idx` (`role_id`),
   KEY `k_permission_has_role_permission1_idx` (`permission_id`),
@@ -145,7 +145,7 @@ CREATE TABLE `role_has_permission` (
 
 DROP TABLE IF EXISTS `permission`;
 CREATE TABLE `permission` (
-  `id` int(11) NOT NULL,
+  `id` int(11) unsigned NOT NULL,
   `name` varchar(63) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

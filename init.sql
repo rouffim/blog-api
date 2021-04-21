@@ -30,7 +30,8 @@ INSERT INTO `permission` VALUES
 (4,'remove_own_article'),
 (5,'remove_all_article'),
 (6,'pin_article'),
-(7,'change_role');
+(7,'change_role_user'),
+(8,'delete_user');
 /*!40000 ALTER TABLE `permission` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -62,7 +63,8 @@ INSERT INTO `role_has_permission` VALUES
 (2,4),
 (2,5),
 (2,6),
-(2,7);
+(2,7),
+(2,8);
 /*!40000 ALTER TABLE `role_has_permission` ENABLE KEYS */;
 UNLOCK TABLES;
 

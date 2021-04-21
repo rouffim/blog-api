@@ -37,14 +37,13 @@ class Article extends Model
         'image_extension',
         'nb_views',
         'is_pinned',
-        'user_id',
     ];
 
     public static $sortable = [
         'title',
         'nb_views',
         'is_pinned',
-        'user_id',
+        'users_id',
         'created_at',
         'updated_at',
     ];
@@ -85,6 +84,6 @@ class Article extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, "users_id");
     }
 }

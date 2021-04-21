@@ -15,5 +15,6 @@ final class PermissionEnum extends Enum
     const RemoveOwnArticle = 'remove_own_article';
     const RemoveAllArticle = 'remove_all_article';
     const PinArticle = 'pin_article';
-    const ChangeRole = 'change_role';
+    const ChangeRoleUser = 'change_role_user';
+    const RemoveUser = 'remove_user';
 }

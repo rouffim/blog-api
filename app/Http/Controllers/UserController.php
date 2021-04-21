@@ -7,6 +7,7 @@ use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -73,14 +74,9 @@ class UserController extends Controller
             $user->name = $request->name;
             $user->save();
 
-            return response()->json([
-                'message' => 'User successfully updated',
-                'user' => $user
-            ], 201);
+            return response()->json(UserResource::make($user), 201);
         } else {
-            if(!$request->user()->tokenCan(PermissionEnum::ChangeRole)) {
-                return response()->json("You don't have the permission of modify an user role.", 405);
-            }
+            Gate::authorize(PermissionEnum::ChangeRoleUser);
 
             $validator = Validator::make($request->all(), [
                 'role' => 'required|integer|exists:role|min:0|max:' . $request->user()->role->id
@@ -105,6 +101,8 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        Gate::authorize(PermissionEnum::RemoveUser);
+
         $user->delete();
     }
 }
