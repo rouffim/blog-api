@@ -22,7 +22,7 @@ class Article extends Model
      *
      * @var string
      */
-    public static $image_location = 'images/articles';
+    public $image_location = 'public/images/articles';
 
     /**
      * The attributes that are mass assignable.
@@ -66,17 +66,6 @@ class Article extends Model
     public function getRouteKeyName()
     {
         return 'uuid';
-    }
-
-    /**
-     * Get the filename of the article.
-     * @return string|null
-     */
-    public function getFilename(): ?string
-    {
-        return is_null($this->image_extension) ?
-            null :
-            $this->uuid . '.' . $this->image_extension;
     }
 
     /**

@@ -25,7 +25,7 @@ class User extends Authenticatable
      *
      * @var string
      */
-    public static $image_location = 'images/users';
+    public $image_location = 'public/images/users';
 
     /**
      * Get the route key for the model.
@@ -69,17 +69,6 @@ class User extends Authenticatable
 //    protected $casts = [
 //        'email_verified_at' => 'datetime',
 //    ];
-
-    /**
-     * Get the filename of the user.
-     *
-     * @return string
-     */
-    public function getFilename()
-    {
-        return $this->uuid . '.' . $this->image_extension;
-    }
-
 
     /**
      * Get all user's articles.

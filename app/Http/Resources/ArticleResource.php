@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Helpers\FileHelper;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ArticleResource extends JsonResource
@@ -19,7 +20,7 @@ class ArticleResource extends JsonResource
             'title' => $this->title,
             'excerpt' => $this->excerpt,
             'body' => $this->body,
-            'image' => $this->getFilename(),
+            'image' => FileHelper::getModelImageUrl($this),
             'nb_views' => $this->nb_views,
             'is_pinned' => $this->is_pinned,
             'user' => UserResource::make($this->user),

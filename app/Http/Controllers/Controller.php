@@ -11,6 +11,9 @@ use Illuminate\Support\Str;
 
 class Controller extends BaseController
 {
+    const SORT_TYPE_ASC = 'asc';
+    const SORT_TYPE_DESC = 'desc';
+
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
     /**
@@ -27,6 +30,9 @@ class Controller extends BaseController
         $perPageParam = $request->query('perPage');
         $perPage = Str::length($perPageParam) > 0 && is_numeric($perPageParam) ? $perPageParam : $perPageDefault;
         $sort = $request->query('sort');
+        $sortType = $request->query('sortType');
+        $sortType = isset($sortType) && ($sortType === self::SORT_TYPE_ASC || $sortType === self::SORT_TYPE_DESC) ?
+            $sortType : self::SORT_TYPE_ASC;
         $search = $request->query('search');
 
         if(Str::length($search) > 0) {
@@ -34,7 +40,7 @@ class Controller extends BaseController
         }
 
         if(Str::length($sort) > 0 && in_array($sort, $model::$sortable)) {
-            $query = $query->orderBy($sort);
+            $query = $query->orderBy($sort, $sortType);
         }
 
         return $query->paginate($perPage);

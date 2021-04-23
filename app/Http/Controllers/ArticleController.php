@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PermissionEnum;
+use App\Helpers\FileHelper;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
 use Illuminate\Http\Request;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use function App\Helpers\getModelImage;
 
 class ArticleController extends Controller
 {
@@ -51,10 +53,10 @@ class ArticleController extends Controller
 
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|between:3,200',
-            'excerpt' => 'string|max:200',
+            'excerpt' => 'string|max:200|nullable',
             'body' => 'required|string',
-            'image' => 'image',
-            'is_pinned' => 'boolean',
+            'image' => 'image|nullable',
+            'is_pinned' => 'boolean|nullable',
         ]);
 
         if($validator->fails()){
@@ -93,10 +95,10 @@ class ArticleController extends Controller
 
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|between:10,200',
-            'excerpt' => 'string|max:500',
+            'excerpt' => 'string|max:500|nullable',
             'body' => 'required|string',
-            'image' => 'image',
-            'is_pinned' => 'boolean',
+            'image' => 'image|nullable',
+            'is_pinned' => 'boolean|nullable',
         ]);
 
         if($validator->fails()){
@@ -141,11 +143,11 @@ class ArticleController extends Controller
         }
 
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
-            if(Storage::exists(Article::$image_location . '/' . $article->getFilename())) {
-                Storage::delete(Article::$image_location . '/' . $article->getFilename());
+            if(Storage::exists($article->image_location . '/' . FileHelper::getModelImage($article))) {
+                Storage::delete($article->image_location . '/' . FileHelper::getModelImage($article));
             }
             $article->image_extension = $request->image->extension();
-            $request->image->storeAs(Article::$image_location, $article->getFilename());
+            $request->image->storeAs($article->image_location, FileHelper::getModelImage($article));
         }
 
         $article->save();
