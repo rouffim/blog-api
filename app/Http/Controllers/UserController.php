@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PermissionEnum;
+use App\Helpers\FileHelper;
 use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -26,9 +28,15 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return UserResource::collection(User::all());
+        return UserResource::collection(
+            $this->pageableRequest(
+                $request,
+                User::class,
+                'name'
+            )
+        );
     }
 
     /**
@@ -64,22 +72,34 @@ class UserController extends Controller
     {
         if ($request->user()->id === $user->id) {
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string|between:2,100'
+                'name' => 'string|between:2,100|nullable',
+                'image' => 'image|nullable'
             ]);
 
             if($validator->fails()){
                 return response()->json($validator->errors()->toJson(), 400);
             }
 
-            $user->name = $request->name;
+            if(isset($request->name)) {
+                $user->name = $request->name;
+            }
+
+            if ($request->hasFile('image') && $request->file('image')->isValid()) {
+                if(Storage::exists($user->image_location . '/' . FileHelper::getModelImage($user))) {
+                    Storage::delete($user->image_location . '/' . FileHelper::getModelImage($user));
+                }
+                $user->image_extension = $request->image->extension();
+                $request->image->storeAs($user->image_location, FileHelper::getModelImage($user));
+            }
+
             $user->save();
 
             return response()->json(UserResource::make($user), 201);
         } else {
-            Gate::authorize(PermissionEnum::ChangeRoleUser);
+            Gate::authorize(PermissionEnum::ChangeRoleUser, $user);
 
             $validator = Validator::make($request->all(), [
-                'role' => 'required|integer|exists:role|min:0|max:' . $request->user()->role->id
+                'role' => 'required|integer|exists:role,id|max:' . $request->user()->role->id
             ]);
 
             if($validator->fails()){
@@ -101,7 +121,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        Gate::authorize(PermissionEnum::RemoveUser);
+        Gate::authorize(PermissionEnum::RemoveUser, $user);
 
         $user->delete();
     }

@@ -7,6 +7,7 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class Controller extends BaseController
@@ -21,9 +22,10 @@ class Controller extends BaseController
      * @param $model
      * @param string $searchColumnName
      * @param int $perPageDefault
+     * @param array $otherParams
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    protected function pageableRequest(Request $request, $model, string $searchColumnName, int $perPageDefault = 10): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    protected function pageableRequest(Request $request, $model, string $searchColumnName, int $perPageDefault = 10, array $otherParams = null): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $query = $model::query();
 
@@ -35,11 +37,19 @@ class Controller extends BaseController
             $sortType : self::SORT_TYPE_ASC;
         $search = $request->query('search');
 
-        if(Str::length($search) > 0) {
+        if (Str::length($search) > 0) {
             $query->where($searchColumnName, 'like', "%$search%");
         }
 
-        if(Str::length($sort) > 0 && in_array($sort, $model::$sortable)) {
+        if (!is_null($otherParams)) {
+            foreach ($otherParams as $param) {
+                if ($request->has($param)) {
+                    $query->where($param, $request->query($param));
+                }
+            }
+        }
+
+        if (Str::length($sort) > 0 && in_array($sort, $model::$sortable)) {
             $query = $query->orderBy($sort, $sortType);
         }
 

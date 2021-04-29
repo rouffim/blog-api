@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\PermissionEnum;
 use App\Helpers\FileHelper;
+use App\Helpers\UtilsHelper;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
 use Illuminate\Http\Request;
@@ -36,7 +37,9 @@ class ArticleController extends Controller
             $this->pageableRequest(
                 $request,
                 Article::class,
-                'title'
+                'title',
+                10,
+                ['is_pinned']
             )
         );
     }
@@ -56,7 +59,7 @@ class ArticleController extends Controller
             'excerpt' => 'string|max:200|nullable',
             'body' => 'required|string',
             'image' => 'image|nullable',
-            'is_pinned' => 'boolean|nullable',
+            'is_pinned' => 'nullable',
         ]);
 
         if($validator->fails()){
@@ -91,14 +94,14 @@ class ArticleController extends Controller
      */
     public function update(Request $request, Article $article)
     {
-        Gate::authorize(PermissionEnum::EditOwnArticle);
+        Gate::authorize(PermissionEnum::EditOwnArticle, $article);
 
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|between:10,200',
-            'excerpt' => 'string|max:500|nullable',
+            'title' => 'required|string|between:3,200',
+            'excerpt' => 'string|max:200|nullable',
             'body' => 'required|string',
             'image' => 'image|nullable',
-            'is_pinned' => 'boolean|nullable',
+            'is_pinned' => 'nullable',
         ]);
 
         if($validator->fails()){
@@ -113,12 +116,12 @@ class ArticleController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Article  $article
+     * @param  \App\Models\Article $article
      * @return \Illuminate\Http\Response
      */
     public function destroy(Article $article)
     {
-        Gate::authorize(PermissionEnum::RemoveOwnArticle);
+        Gate::authorize(PermissionEnum::RemoveOwnArticle, $article);
 
         $article->delete();
     }
@@ -138,8 +141,8 @@ class ArticleController extends Controller
             $article->excerpt = $request->excerpt;
         }
 
-        if ($request->has('is_pinned') && is_bool($request->is_pinned) && $request->user()->tokenCan(PermissionEnum::PinArticle)) {
-            $article->is_pinned = $request->is_pinned;
+        if ($request->has('is_pinned') && UtilsHelper::isBoolean($request->is_pinned) && $request->user()->tokenCan(PermissionEnum::PinArticle)) {
+            $article->is_pinned = boolval($request->is_pinned);
         }
 
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
